@@ -1,0 +1,53 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. Modelo de Producto
+model Product {
+  id          String   @id @default(uuid()) // ID único tipo String largo y aleatorio para mas seguridad
+  name        String
+  description String
+  price       Decimal  @db.Decimal(10, 2) // Manejo preciso de dinero (usar Float o Double genera problemas de redondeo por como funciona js)
+  image       String 
+  stock       Int      @default(0)
+  slug        String   @unique // Para la URL: chambinia.com/producto/zapatillas-nike (SEO friendly)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+}
+
+// 2. Modelo de Categoría
+model Category {
+  id    String @id @default(uuid())
+  name  String
+  slug  String @unique // ej: /categoria/relojes
+
+  // Relación inversa: Una categoría tiene muchos productos
+  products Product[]
+}
+
+// 3. Modelo de Usuario (Básico para empezar)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(USER) // Enum para manejar permisos
+  
+  createdAt DateTime @default(now())
+}
+
+// Definición de Roles (Enum)
+enum Role {
+  USER
+  ADMIN
+}
